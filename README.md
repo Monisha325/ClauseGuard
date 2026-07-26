@@ -239,7 +239,3 @@ replaces or modifies the live system in `backend/`.
   validation).
 - Voyage AI's free-tier rate limit (3 requests/minute) is the effective
   throughput ceiling for embedding-heavy operations.
-
-## License
-
-[MIT](./LICENSE)
