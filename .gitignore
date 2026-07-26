@@ -1,0 +1,41 @@
+# --- Secrets ---
+.env
+*.pem
+*.key
+
+# --- Python ---
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# --- Node / frontend ---
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+npm-debug.log*
+
+# --- Model / data artifacts (regenerate locally, see experiments/*/README.md) ---
+*.safetensors
+*.bin
+*.pt
+*.ckpt
+experiments/**/data/CUADv1_raw.json
+
+# --- Docker / infra volumes ---
+chroma_data/
+contract_storage/
+postgres_data/
+
+# --- OS / editor cruft ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp

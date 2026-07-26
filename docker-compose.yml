@@ -1,0 +1,133 @@
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-clauseguard}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-clauseguard}
+      POSTGRES_DB: ${POSTGRES_DB:-clauseguard}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-clauseguard}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    # M15: Celery broker + result backend. One instance does both jobs --
+    # no reason to run separate infrastructure for this milestone's scope.
+    image: redis:7-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-clauseguard}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-clauseguard}
+      POSTGRES_DB: ${POSTGRES_DB:-clauseguard}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      VOYAGE_API_KEY: ${VOYAGE_API_KEY}
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      REDIS_URL: redis://redis:6379/0
+      # M36: per-user daily upload cap -- real, configurable via env,
+      # never a code edit (see backend/middleware/rate_limit.py).
+      DAILY_UPLOAD_LIMIT_PER_USER: ${DAILY_UPLOAD_LIMIT_PER_USER:-10}
+      # M39: Brevo transactional email (OTP signup verification). Only
+      # the app container's routes/auth.py actually calls
+      # services/email.py today, but set on worker too (see worker's
+      # own block below) per this project's established M15 "never let
+      # the two environment blocks drift apart" standard.
+      BREVO_API_KEY: ${BREVO_API_KEY}
+      BREVO_SENDER_EMAIL: ${BREVO_SENDER_EMAIL}
+    # Host port 8010 (not 8000): port 8000 on this machine is permanently
+    # held by an unrelated, healthy container from another project and
+    # must not be disturbed. 8010 is the accepted, permanent port for
+    # ClauseGuard. The container-internal port stays 8000 (see
+    # backend/Dockerfile's uvicorn --port and CMD).
+    ports:
+      - "8010:8000"
+    volumes:
+      # M10: Chroma's persistent client writes its local index here. Named
+      # volume (like pgdata) so the index survives container recreation.
+      - chromadata:/app/chroma_data
+      # M15: uploaded contract files must be readable by the worker
+      # container too, since it's a SEPARATE container from app -- without
+      # this shared volume, the worker has no way to read a file app saved
+      # to its own local filesystem (this had been a latent gap since M4;
+      # it was never surfaced before because the same container that
+      # saved the file also processed it synchronously, within its own
+      # lifetime, until now).
+      - contract_storage:/app/storage
+    depends_on:
+      - db
+      - redis
+
+  worker:
+    # Same image as app (same Dockerfile, same build context) -- only the
+    # command differs. This guarantees the worker has the exact same
+    # Python environment/dependencies as the app, not a second image that
+    # could silently drift out of sync.
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    # `python -m celery`, not the bare `celery` entry point: the bare
+    # console-script entry point does NOT add the current working
+    # directory (/app) to sys.path, so top-level packages like
+    # `embeddings`/`ingestion`/`agent` fail to import (confirmed for real
+    # -- ModuleNotFoundError: No module named 'embeddings' -- before this
+    # fix). `python -m X` adds the CWD to sys.path automatically, which is
+    # how uvicorn's own equivalent case works for the app container.
+    command: python -m celery -A worker.celery_app worker --loglevel=info --concurrency=1
+    restart: unless-stopped
+    environment:
+      # Deliberately the SAME environment block as app, verified
+      # concretely (not assumed) per M15's explicit known-risk callout --
+      # see the M15 testing steps for the real worker-log proof. Every
+      # var the pipeline touches (DB credentials, both API keys) must be
+      # present here exactly as in app, since worker/tasks.py calls the
+      # exact same run_contract_pipeline() the app used to call directly.
+      POSTGRES_USER: ${POSTGRES_USER:-clauseguard}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-clauseguard}
+      POSTGRES_DB: ${POSTGRES_DB:-clauseguard}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      VOYAGE_API_KEY: ${VOYAGE_API_KEY}
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      REDIS_URL: redis://redis:6379/0
+      # M36: not actually read by the worker (the upload-rate check only
+      # runs in routes/contracts.py, an app-only code path) -- included
+      # here anyway purely to keep this block identical to app's, per
+      # this project's own established M15 precedent of never letting the
+      # two environment blocks drift apart.
+      DAILY_UPLOAD_LIMIT_PER_USER: ${DAILY_UPLOAD_LIMIT_PER_USER:-10}
+      # M39: not actually read by the worker either (same reasoning as
+      # DAILY_UPLOAD_LIMIT_PER_USER above -- services/email.py is only
+      # ever called from routes/auth.py, an app-only code path) -- set
+      # here anyway for the same M15 parity reason.
+      BREVO_API_KEY: ${BREVO_API_KEY}
+      BREVO_SENDER_EMAIL: ${BREVO_SENDER_EMAIL}
+    volumes:
+      - chromadata:/app/chroma_data
+      - contract_storage:/app/storage
+    depends_on:
+      - db
+      - redis
+
+volumes:
+  pgdata:
+  chromadata:
+  contract_storage:

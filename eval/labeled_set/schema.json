@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LabeledClause",
+  "description": "One human-labeled ground-truth row for a real, persisted ClauseGuard clause. This file is DERIVED from eval/loader.py's LabeledClause Pydantic model via model_json_schema() -- that model is the single source of truth; if the schema ever needs to change, change the Pydantic model and regenerate this file, don't hand-edit this JSON directly, or the two will drift apart.",
+  "type": "object",
+  "properties": {
+    "contract_id": {
+      "type": "string",
+      "format": "uuid",
+      "title": "Contract Id",
+      "description": "Matches Contract.id (Postgres UUID) for the real contract this clause belongs to."
+    },
+    "clause_id": {
+      "type": "string",
+      "format": "uuid",
+      "title": "Clause Id",
+      "description": "Matches Clause.id (Postgres UUID) for the specific persisted clause being labeled."
+    },
+    "category": {
+      "type": "string",
+      "title": "Category",
+      "description": "The labeler's primary category judgment. Must be one of M8's 5 real categories, or 'Unclassified' if the clause genuinely fits none of them -- a real, valid outcome, not an error.",
+      "enum": [
+        "Limitation of Liability",
+        "Indemnification",
+        "Termination",
+        "Governing Law / Jurisdiction",
+        "Confidentiality",
+        "Unclassified"
+      ]
+    },
+    "alternate_category": {
+      "title": "Alternate Category",
+      "description": "A second, plausible category if this clause is genuinely ambiguous between two categories. Leave null/omit when the primary category call was unambiguous (the common case).",
+      "default": null,
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "Limitation of Liability",
+            "Indemnification",
+            "Termination",
+            "Governing Law / Jurisdiction",
+            "Confidentiality",
+            "Unclassified"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "is_risky": {
+      "type": "boolean",
+      "title": "Is Risky",
+      "description": "The labeler's judgment on whether this clause poses a real, notable risk to the reviewing party."
+    },
+    "severity": {
+      "type": "string",
+      "title": "Severity",
+      "description": "Must match flag_clause's real severity scale exactly (see backend/agent/tools.py's FlagClauseOutput). If the call feels genuinely borderline between two levels, record the single best call here and use `notes` for the uncertainty.",
+      "enum": ["low", "medium", "high"]
+    },
+    "query": {
+      "type": "string",
+      "minLength": 1,
+      "title": "Query",
+      "description": "A natural-language query the labeler believes SHOULD retrieve this clause via semantic search -- what a later Hit@K eval will issue against the real retrieval endpoint."
+    },
+    "notes": {
+      "title": "Notes",
+      "description": "Free-text field for any labeler uncertainty -- a borderline severity call, reasoning behind an alternate_category, or any other judgment call worth recording. Optional; leave null/omit if there's nothing notable about this row.",
+      "default": null,
+      "anyOf": [
+        { "type": "string" },
+        { "type": "null" }
+      ]
+    }
+  },
+  "required": ["contract_id", "clause_id", "category", "is_risky", "severity", "query"]
+}

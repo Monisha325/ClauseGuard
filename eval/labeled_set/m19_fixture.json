@@ -1,0 +1,48 @@
+[
+  {
+    "contract_id": "b389d22e-7766-4dea-af15-025c37617ca7",
+    "clause_id": "dd952865-e15c-4319-a431-75f9feacd114",
+    "category": "Confidentiality",
+    "is_risky": false,
+    "severity": "low",
+    "query": "confidentiality obligation to protect proprietary information from disclosure to third parties",
+    "notes": "M19 SYNTHETIC SMOKE-TEST FIXTURE ROW (not a real labeled contract) -- see eval/retrieval_eval.py's module docstring. Easy case: query deliberately shares heavy lexical overlap AND real semantic relevance with the target clause, so both vector search and the naive keyword baseline are expected to find it easily -- a sanity-check baseline row, not the interesting test case."
+  },
+  {
+    "contract_id": "b389d22e-7766-4dea-af15-025c37617ca7",
+    "clause_id": "784cf976-2191-44fd-838b-759cd8069003",
+    "category": "Limitation of Liability",
+    "is_risky": true,
+    "severity": "medium",
+    "query": "cap on total liability and exclusion of consequential damages",
+    "notes": "M19 SYNTHETIC SMOKE-TEST FIXTURE ROW (not a real labeled contract). Moderate case: decent lexical overlap (liability, damages, consequential) with the target clause."
+  },
+  {
+    "contract_id": "b389d22e-7766-4dea-af15-025c37617ca7",
+    "clause_id": "2fd28bd4-a63c-48b9-a866-b48b1818e505",
+    "category": "Termination",
+    "is_risky": true,
+    "severity": "medium",
+    "query": "right to end the agreement early after an uncured breach",
+    "notes": "M19 SYNTHETIC SMOKE-TEST FIXTURE ROW (not a real labeled contract). Rewording case: 'end' vs 'terminate' and 'uncured' vs 'fails to cure' share no literal tokens, while 'agreement'/'breach' are shared but also appear across nearly every other clause in this fixture (weak discriminators for a naive keyword count)."
+  },
+  {
+    "contract_id": "b389d22e-7766-4dea-af15-025c37617ca7",
+    "clause_id": "374677a0-d6c0-4684-a8b6-594eee17b7fe",
+    "category": "Indemnification",
+    "alternate_category": "Limitation of Liability",
+    "is_risky": true,
+    "severity": "high",
+    "query": "who is responsible for costs if the vendor makes an error and causes a claim",
+    "notes": "M19 SYNTHETIC SMOKE-TEST FIXTURE ROW (not a real labeled contract). THE deliberate semantic-vs-keyword contrast case (testing step 3): near-zero literal token overlap with the target Indemnification clause's actual text ('claim' vs 'claims', 'error' vs 'errors, omissions' -- no shared stems since the naive baseline doesn't stem), while the query's 'costs'/'for'/'vendor'/'and'/'the' happen to literally overlap MORE with a completely different clause in this same contract (clause_id def9c5ab-9030-44d5-90f8-654334ae1714, the merged Governing-Law/Expenses chunk, which literally contains 'reimburse Vendor for reasonable travel expenses... costs'). This is designed so the naive keyword baseline gets fooled by that superficial overlap while real vector search should correctly recognize the query is really about fault/liability for an error, i.e. indemnification -- confirmed empirically, not assumed (see testing step 3's real output). Also exercises alternate_category: a Vendor's-negligence indemnification clause is genuinely arguable as a liability-allocation (Limitation of Liability) provision too."
+  },
+  {
+    "contract_id": "b389d22e-7766-4dea-af15-025c37617ca7",
+    "clause_id": "def9c5ab-9030-44d5-90f8-654334ae1714",
+    "category": "Governing Law / Jurisdiction",
+    "is_risky": false,
+    "severity": "low",
+    "query": "which state's laws control this agreement and where must disputes be filed",
+    "notes": "M19 SYNTHETIC SMOKE-TEST FIXTURE ROW (not a real labeled contract). Added specifically to confirm the embedding cache introduced in this milestone's determinism fix correctly handles a genuinely NEW query it has never embedded before (a cache miss), not just replaying the 4 original queries which are now all cache hits. Also incidentally rounds out fixture coverage to all 5 of M8's real categories across this file's rows (Confidentiality, Limitation of Liability, Termination, Indemnification, Governing Law / Jurisdiction). Note this clause_id's persisted text also contains the merged 'Expenses' clause (see chunker's undersized-chunk merge behavior) -- irrelevant to this query, which targets only the Governing Law portion."
+  }
+]

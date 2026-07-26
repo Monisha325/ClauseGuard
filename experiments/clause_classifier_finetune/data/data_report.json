@@ -1,0 +1,46 @@
+{
+  "labels": [
+    "Limitation of Liability",
+    "Governing Law / Jurisdiction",
+    "Termination"
+  ],
+  "cuad_category_map": {
+    "Limitation of Liability": "Cap On Liability",
+    "Governing Law / Jurisdiction": "Governing Law",
+    "Termination": "Termination For Convenience"
+  },
+  "min_chars_filter": 40,
+  "raw_span_count_per_category": {
+    "Governing Law / Jurisdiction": 460,
+    "Limitation of Liability": 669,
+    "Termination": 243
+  },
+  "after_dedup_count_per_category": {
+    "Governing Law / Jurisdiction": 446,
+    "Limitation of Liability": 664,
+    "Termination": 240
+  },
+  "train_count_per_category": {
+    "Governing Law / Jurisdiction": 310,
+    "Limitation of Liability": 484,
+    "Termination": 161
+  },
+  "train_total": 955,
+  "train_num_contracts": 310,
+  "val_count_per_category": {
+    "Governing Law / Jurisdiction": 67,
+    "Termination": 47,
+    "Limitation of Liability": 92
+  },
+  "val_total": 206,
+  "val_num_contracts": 66,
+  "test_count_per_category": {
+    "Governing Law / Jurisdiction": 69,
+    "Termination": 32,
+    "Limitation of Liability": 88
+  },
+  "test_total": 189,
+  "test_num_contracts": 68,
+  "total_examples_after_filtering": 1350,
+  "total_contracts_used": 444
+}

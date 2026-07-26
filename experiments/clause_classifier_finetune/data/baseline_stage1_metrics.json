@@ -1,0 +1,65 @@
+{
+  "labels": [
+    "Limitation of Liability",
+    "Governing Law / Jurisdiction",
+    "Termination"
+  ],
+  "n_test_examples": 189,
+  "n_unmatched_span_lookup_failures": 0,
+  "n_unclassified_by_stage1": 108,
+  "stage1_coverage_fraction": 0.4285714285714286,
+  "accuracy_treating_unclassified_as_wrong": 0.4126984126984127,
+  "per_class": {
+    "Limitation of Liability": {
+      "precision": 1.0,
+      "recall": 0.22727272727272727,
+      "f1": 0.37037037037037035,
+      "support": 88
+    },
+    "Governing Law / Jurisdiction": {
+      "precision": 0.9787234042553191,
+      "recall": 0.6666666666666666,
+      "f1": 0.7931034482758621,
+      "support": 69
+    },
+    "Termination": {
+      "precision": 0.8571428571428571,
+      "recall": 0.375,
+      "f1": 0.5217391304347826,
+      "support": 32
+    }
+  },
+  "confusion_matrix_label_order": [
+    "Unclassified",
+    "Limitation of Liability",
+    "Governing Law / Jurisdiction",
+    "Termination"
+  ],
+  "confusion_matrix": [
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      65,
+      20,
+      1,
+      2
+    ],
+    [
+      23,
+      0,
+      46,
+      0
+    ],
+    [
+      20,
+      0,
+      0,
+      12
+    ]
+  ],
+  "note": "Baseline = ClauseGuard's real, unmodified stage-1 heading-lexicon classifier only. Stage 2 (embedding centroid) was NOT run: it requires a live Voyage AI API call (VOYAGE_API_KEY), unavailable in this environment, per explicit user decision to proceed with stage-1-only baseline rather than fabricate/skip this constraint. heading_path was approximated from real preceding CUAD contract text (see script docstring) since CUAD spans have no chunker-produced heading_path of their own."
+}

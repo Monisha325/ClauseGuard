@@ -1,0 +1,30 @@
+[
+  {
+    "contract_id": "00000000-0000-0000-0000-000000000001",
+    "clause_id": "00000000-0000-0000-0000-0000000000a1",
+    "category": "Indemnification",
+    "is_risky": true,
+    "severity": "high",
+    "query": "does the vendor have to cover our legal costs if we get sued",
+    "notes": null
+  },
+  {
+    "contract_id": "00000000-0000-0000-0000-000000000001",
+    "clause_id": "00000000-0000-0000-0000-0000000000a2",
+    "category": "Indemnification",
+    "alternate_category": "Limitation of Liability",
+    "is_risky": true,
+    "severity": "medium",
+    "query": "who pays for damages caused by a breach and is there any cap",
+    "notes": "PLACEHOLDER EXAMPLE ONLY -- this fake clause deliberately reads as both an indemnification obligation AND a liability cap in the same sentence, which is exactly the kind of real ambiguity alternate_category exists for. A real labeler would fill in a genuine second read here, not this note."
+  },
+  {
+    "contract_id": "00000000-0000-0000-0000-000000000002",
+    "clause_id": "00000000-0000-0000-0000-0000000000b1",
+    "category": "Confidentiality",
+    "is_risky": false,
+    "severity": "low",
+    "query": "standard mutual confidentiality obligation",
+    "notes": "PLACEHOLDER EXAMPLE ONLY -- shows the boring/common case: unambiguous category, not risky, no alternate_category needed. Also shows notes being used for general commentary rather than severity uncertainty specifically -- the field is a general release valve, not reserved for one use."
+  }
+]
